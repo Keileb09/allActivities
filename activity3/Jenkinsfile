@@ -1,0 +1,61 @@
+pipeline {
+
+    environment {
+        dockerhub=credentials('dockerhub')
+    }
+
+    agent any
+
+    stages {
+
+        stage("buildImage") {
+            when { changeset "activity3/index.html"}
+            steps {
+                echo "Building image..."
+                sh "docker build -t keileb09/my-nginx ./activity3/"
+            }
+        }
+
+        stage("runImage") {
+            when { changeset "activity3/index.html"}
+            steps {
+                echo "Starting image..."
+                sh "docker run -d -p 80:80 --name my-own-nginx keileb09/my-nginx"
+            }
+        }
+
+        stage("testImage") {
+            when { changeset "activity3/index.html"}
+            steps {
+                echo "Testing image..."
+                sh "curl -s -o /dev/null -I -w '%{http_code}' localhost:80"
+            }
+        }
+
+        stage("uploadImage") {
+            when { changeset "activity3/index.html"}
+            steps {
+                echo "Uploading image..."
+                sh "echo $dockerhub_PSW | docker login -u $dockerhub_USR --password-stdin"
+                sh "docker push keileb09/my-nginx"
+            }
+        }
+    }
+    post {
+
+        success {
+            echo "Tested alright and uploaded to the hub."
+            echo "Cleaning docker containers..."
+            sh "docker rm -f my-own-nginx"
+            echo "Cleaning docker image..."
+            sh "docker rmi keileb09/my-nginx"
+        }
+
+        failure {
+            echo "The test failed..."
+            echo "Cleaning docker image..."
+            sh "docker rmi \$(docker images -f 'dangling=true' -q)"
+        }
+    }
+}
+
