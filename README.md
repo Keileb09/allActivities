@@ -53,7 +53,7 @@ docker build -t thefront .
 From the activity2 folder, execute a docker-compose up command
 
 ```
-# From the root folder
+# From the activity2 folder
 docker-compose up
 ```
 *You can use the -d option to run it detached.*
