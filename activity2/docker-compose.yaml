@@ -1,0 +1,13 @@
+services:
+  front:
+    image: thefront
+    ports:
+      - "3000:3000"
+
+  back:
+    image: theback
+    environment:
+      SECRET_KEY: "${SECRET_KEY}"
+    expose:
+      - "8000"
+
