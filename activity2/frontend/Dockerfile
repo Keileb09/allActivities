@@ -4,15 +4,13 @@ WORKDIR /frontend
 
 COPY ["package.json", "package-lock.json", "./"]
 
-RUN npm install
+RUN npm install && npm install express --save
 
 COPY [".", "."]
 
-EXPOSE 3000
-
-RUN npm install -g serve
-
 RUN npm run build
+
+EXPOSE 3000
 
 WORKDIR /assets/bundles
 

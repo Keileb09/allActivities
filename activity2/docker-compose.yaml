@@ -1,13 +1,41 @@
 services:
-  front:
-    image: thefront
+  frontend:
+    container_name: frontReact
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
     ports:
       - "3000:3000"
+    networks:
+      - activity2Network
 
-  back:
-    image: theback
+  backend:
+    build:
+      container_name: backDjango
+      context: ./backend
+      dockerfile: ./Dockerfile
     environment:
       SECRET_KEY: "${SECRET_KEY}"
-    expose:
-      - "8000"
+    ports:
+      - "8000:8000"
+    networks:
+      - activity2Network
+    depends_on:
+      - db
 
+  db:
+    container_name: postgreSQL
+    image: postgres:14.2-bullseye
+    volumes:
+      - ./postgresql/data:var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    expose:
+      - "5432"
+    networks:
+      - activity2Network
+
+networks:
+  activity2Network:
